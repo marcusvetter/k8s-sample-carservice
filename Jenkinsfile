@@ -44,17 +44,18 @@ node('k8s-cf') {
 
         // Execute tests etc.
         // ...
-        sleep(10)
+        input 'Blue tests pass?'
 
         // Map blue app to live instance
         sh "cf map-route $appNameBlue $domain -n $hostName"
 
         // Just to visualize the blue-green-deployment
-        sleep(10)
+        input 'Delete blue instance?'
 
         // Delete old app, rename blue to live
         sh "cf delete $appName -f"
         sh "cf rename $appNameBlue $appName"
+        sh "cf delete-route $domain -n $hostNameBlue"
 
         // Logout
         sh 'cf logout'
