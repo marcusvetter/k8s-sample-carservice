@@ -55,6 +55,7 @@ node('k8s-cf') {
         // Delete old app, rename blue to live
         sh "cf delete $appName -f"
         sh "cf rename $appNameBlue $appName"
+        sh "cf delete-route $domain -n $hostNameBlue"
 
         // Logout
         sh 'cf logout'
