@@ -13,7 +13,8 @@ node('k8s-gradle') {
 
 node('k8s-cf') {
 
-    stage('Deploy to playground') {
+    stage('Deploy to cloud foundry') {
+
         // Login
         withCredentials([[$class          : 'UsernamePasswordMultiBinding',
                           credentialsId   : 'cloud-foundry-meetup-user',
@@ -30,11 +31,25 @@ node('k8s-cf') {
         // Prepare deployment
         unstash(name: 'deployable')
 
-        // Push app
-        sh 'cf push carservice ' +
-                '-b https://github.com/cloudfoundry/java-buildpack.git#v3.10 ' +
-                '-p build/libs/carservice-1.0.0.jar ' +
-                '-n meetup-carservice '
+        String buildpack = 'https://github.com/cloudfoundry/java-buildpack.git#v3.10'
+        String pathToDeployable = 'build/libs/carservice-1.0.0.jar'
+        String domain = 'eu-west-1.apps.msi.audi.com'
+        String appName = 'carservice'
+        String appNameBlue = "$appName-blue"
+        String hostName = 'meetup-carservice'
+        String hostNameBlue = "$hostName-blue"
+
+        // Push app to blue instance
+        sh "cf push $appNameBlue -b $buildpack -p $pathToDeployable -n $hostNameBlue"
+
+        // Execute tests etc.
+        // ...
+        sleep(3)
+
+        // Perform route switch
+        sh "cf map-route $appNameBlue $domain -n $hostName"
+        sh "cf delete $appName -f"
+        sh "cf rename $appNameBlue $appName"
 
         // Logout
         sh 'cf logout'
