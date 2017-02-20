@@ -17,14 +17,12 @@ buildscript {
 
 
 apply plugin: 'java'
-apply plugin: 'eclipse-wtp'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
-apply plugin: 'war'
 
-war {
-    baseName = 'spring-boot-sample-web-static'
-    version = '0.0.0'
+jar {
+    baseName = 'carservice'
+    version = '1.0.0'
 }
 
 repositories {
