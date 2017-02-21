@@ -31,31 +31,13 @@ node('k8s-cf') {
         // Prepare deployment
         unstash(name: 'deployable')
 
+        // Push app
         String buildpack = 'https://github.com/cloudfoundry/java-buildpack.git#v3.10'
         String pathToDeployable = 'build/libs/carservice-1.0.0.jar'
-        String domain = 'eu-west-1.apps.msi.audi.com'
         String appName = 'carservice'
-        String appNameBlue = "$appName-blue"
         String hostName = 'meetup-carservice'
-        String hostNameBlue = "$hostName-blue"
 
-        // Push app to blue instance
-        sh "cf push $appNameBlue -b $buildpack -p $pathToDeployable -n $hostNameBlue"
-
-        // Execute tests etc.
-        // ...
-        input 'Blue tests pass?'
-
-        // Map blue app to live instance
-        sh "cf map-route $appNameBlue $domain -n $hostName"
-
-        // Just to visualize the blue-green-deployment
-        input 'Delete blue instance?'
-
-        // Delete old app, rename blue to live
-        sh "cf delete $appName -f"
-        sh "cf rename $appNameBlue $appName"
-        sh("cf unmap-route $appNameBlue $domain -n $appName")
+        sh "cf push $appName -b $buildpack -p $pathToDeployable -n $hostName"
 
         // Logout
         sh 'cf logout'
