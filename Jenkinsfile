@@ -1,11 +1,10 @@
-node('k8s-gradle') {
-  
-  stage('Checkout') {
-    checkout scm
+def pipeline
+
+node {
+  stage('Load pipeline') {
+    pipeline = fileLoader.fromGit('shared-pipelines/carservice-pipeline.groovy',
+                                  'https://github.com/marcusvetter/k8s-sample-pipeline.git')
   }
-  
-  stage('Build and unit test') {
-    sh 'gradle clean build'
-  }
-  
 }
+
+pipeline.execute()
